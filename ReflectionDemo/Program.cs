@@ -9,34 +9,56 @@ namespace ReflectionDemo
 {
     class Program
     {
+
         static void Main(string[] args)
         {
-            var result = Generator.GetSurprise(1);
-
-            // Console.WriteLine(result);
-
-            // Console.WriteLine(result.Id);
+            var result = Generator.GetSurprise();
 
             Type type = result.GetType();
-            // Type type = typeof(result); wrong!
-
-            /* foreach (PropertyInfo propInfo in type.GetProperties())
-            {
-                Console.WriteLine(propInfo.Name + " = " + propInfo.GetValue(result));
-            } */
 
             foreach (FieldInfo fInfo in type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
             {
                 Console.WriteLine(fInfo.Name + " = " + fInfo.GetValue(result));
             }
-
-            foreach (var m in type.GetMethods())
+            Type temp = new object().GetType();
+            MethodInfo[] ObjectMethods = temp.GetMethods();
+            foreach (var item in type.GetMethods())
             {
-                if (m.Name == "PrintPerson")
+                bool x = false;
+                foreach (var it in ObjectMethods)
                 {
-                    m.Invoke(result, null);
+                    if (it.ToString() == item.ToString())
+                    {
+                        x = true;
+                        break;
+                    }
+                }
+                if (!x)
+                {
+                    Console.WriteLine(item);
+                    Console.Write("Invoke: ");
+
+                }
+                try
+                {
+                    object myObj = item.Invoke(result, new object[item.GetParameters().Length]);
+                    Console.WriteLine(myObj + "\n");
+                }
+                catch (ArgumentException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+                foreach (var m in type.GetMethods())
+                {
+                    if (m.Name == "PrintPerson")
+                    {
+                        m.Invoke(result, null);
+                    }
+
                 }
             }
+
         }
     }
 }
